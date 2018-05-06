@@ -3,33 +3,38 @@ package org.sethia.leetcode.next_greater_number;
 public class SolutionII {
 
   public int[] nextGreaterElements(int[] nums) {
+    if (nums == null || nums.length == 0) {
+      return nums;
+    }
+    int[] resultIndices = new int[nums.length];
     int[] results = new int[nums.length];
 
     for (int findNextGreaterForThisIndex = nums.length - 1; findNextGreaterForThisIndex >= 0;
         findNextGreaterForThisIndex--) {
-      int lookAheadIndex = incrementAndWrap(nums.length, findNextGreaterForThisIndex);
+      int lookAheadIndex = (1 + findNextGreaterForThisIndex) % nums.length;
       int indexForNextGreater = -1;
-      while (indexForNextGreater == -1
-          && lookAheadIndex < findNextGreaterForThisIndex) {
+      while (indexForNextGreater == -1) {
 
         if (nums[findNextGreaterForThisIndex] < nums[lookAheadIndex]) {
           indexForNextGreater = lookAheadIndex;
-        } else if (results[lookAheadIndex] == -1) {
+        } else if (resultIndices[lookAheadIndex] == -1) {
           break;
-        } else if (results[lookAheadIndex] == 0) {
-          lookAheadIndex = incrementAndWrap(nums.length, lookAheadIndex);
         } else {
-          lookAheadIndex = results[lookAheadIndex];
+          if (resultIndices[lookAheadIndex] == 0) {
+            lookAheadIndex = (1 + lookAheadIndex) % nums.length;
+          } else {
+            lookAheadIndex = resultIndices[lookAheadIndex];
+          }
+          if (lookAheadIndex == findNextGreaterForThisIndex) {
+            break;
+          }
         }
       }
-      results[findNextGreaterForThisIndex] = indexForNextGreater;
+      resultIndices[findNextGreaterForThisIndex] = indexForNextGreater;
+      results[findNextGreaterForThisIndex] =
+          indexForNextGreater == -1 ? -1 : nums[indexForNextGreater];
     }
 
     return results;
   }
-
-  private int incrementAndWrap(int numsLength, int findNextGreaterForThisIndex) {
-    return (findNextGreaterForThisIndex + 1) % numsLength;
-  }
-
 }

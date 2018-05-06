@@ -2,6 +2,7 @@ package org.sethia.leetcode.next_greater_number;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.sethia.test.TestUtils.a;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,10 +15,6 @@ import org.junit.Test;
 public class SolutionITest {
 
   SolutionI solutionI = new SolutionI();
-
-  private int[] a(int... elements) {
-    return elements;
-  }
 
   @Test
   public void test_cornerCases() {

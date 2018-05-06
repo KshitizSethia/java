@@ -1,5 +1,6 @@
 package org.sethia.projects.trading;
 
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -10,8 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -20,6 +19,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
+import org.apache.logging.log4j.util.Strings;
+import org.sethia.utils.TimeUtils;
 import org.sethia.utils.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +30,6 @@ import org.slf4j.LoggerFactory;
 public class PriceHistory {
 
   private static final Logger log = LoggerFactory.getLogger(PriceHistory.class);
-  private static final DateFormat DF = new SimpleDateFormat("yyyy-MM-dd");
   private static final double INITIAL_INVESTMENT = 100.0;
 
   @JsonProperty("Time Series (Daily)")
@@ -46,7 +47,7 @@ public class PriceHistory {
   }
 
   public PriceRange getPriceForDate(final Date date) {
-    final String key = DF.format(date);
+    final String key = TimeUtils.PDT.toDashedString(date);
     return pricesSortedByDate.get(key);
   }
 
@@ -103,18 +104,20 @@ public class PriceHistory {
     }
 
     public static PriceHistory of(final String ticker) throws IOException {
+      String response = Strings.EMPTY;
       try {
         final String safeTicker = URLEncoder.encode(ticker, "UTF-8");
         final String uri = URI_STARTER + safeTicker;
         log.debug("uri for retrieving stock history: " + uri);
-        final String response = WebUtils.INSTANCE.makeGETRequest(uri);
-        log.debug("response with stock history: " + response);
+        response = WebUtils.INSTANCE_WITH_CACHING.makeGETRequest(uri);
+        log.trace("response with stock history: " + response);
         final PriceHistory result = mapper.readValue(response, PriceHistory.class);
         // TODO remove this setter
         result.setTicker(ticker);
         return result;
       } catch (Exception forward) {
-        log.error("Error in retrieving PriceHistory for " + ticker, forward);
+        log.error("Error in retrieving PriceHistory for {}, response recieved: {}", ticker,
+            response, forward);
         throw forward;
       }
     }
@@ -125,10 +128,14 @@ public class PriceHistory {
       tickers.parallelStream()
           .forEach(ticker -> {
             try {
+              TimeUnit.MILLISECONDS.sleep(500);
               result.put(ticker, of(ticker));
             } catch (IOException e) {
               e.printStackTrace();
               throw new RuntimeException(e);
+            } catch (InterruptedException e) {
+              e.printStackTrace();
+              log.warn("Interrupted while sleeping to rate limit.");
             }
           });
 
