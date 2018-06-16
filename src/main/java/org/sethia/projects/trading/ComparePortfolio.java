@@ -9,7 +9,7 @@ import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
-import org.sethia.utils.LineGrapher;
+import org.sethia.utils.graphing.LineGrapherJFreeChart;
 import org.sethia.utils.Tuple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,15 +26,16 @@ public class ComparePortfolio {
     // load existing portfolio
     Portfolio portfolio = Portfolio.Builder.fromYahooFinanceCSV(ns.getString("csv"), "K's stocks");
 
-    LineGrapher lineGrapher = new LineGrapher("Performance of portfolio", "Time", "Gain %age");
+    LineGrapherJFreeChart lineGrapher = new LineGrapherJFreeChart("Performance of portfolio",
+        "Time", "Gain %age");
 
     List<Tuple<Date, Double>> appreciationOfPortfolio = portfolio.getAppreciationSinceStart();
-    log.debug("Tuples for {}:{}{}", portfolio.getName(), System.lineSeparator(), appreciationOfPortfolio.toString());
-    //Collections.shuffle(appreciationOfPortfolio);
+    log.debug("Tuples for {}:{}{}", portfolio.getName(), System.lineSeparator(),
+        appreciationOfPortfolio.toString());
 
-    for (Tuple<Date, Double> t : appreciationOfPortfolio) {
-      lineGrapher.addPoint(t.getRight(), t.getLeft(), portfolio.getName());
-    }
+    appreciationOfPortfolio.forEach(
+        t -> lineGrapher.addPoint(t.getLeft(), t.getRight(), portfolio.getName())
+    );
 
     log.debug("comparing portfolio to: " + ns.getList("compareTo").toString());
 
@@ -47,9 +48,8 @@ public class ComparePortfolio {
           .getAppreciationSinceStart();
       log.trace("Tuples for {}:{}{}", copiedPortfolio.getName(), System.lineSeparator(),
           appreciationOfCopiedPortfolio.toString());
-      for (Tuple<Date, Double> t : appreciationOfCopiedPortfolio) {
-        lineGrapher.addPoint(t.getRight(), t.getLeft(), copiedPortfolio.getName());
-      }
+      appreciationOfCopiedPortfolio
+          .forEach(t -> lineGrapher.addPoint(t.getLeft(), t.getRight(), copiedPortfolio.getName()));
     }
 
     lineGrapher.render();

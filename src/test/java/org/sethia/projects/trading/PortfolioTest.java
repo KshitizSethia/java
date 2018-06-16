@@ -24,6 +24,8 @@ import org.sethia.projects.trading.Portfolio.Builder;
 import org.sethia.utils.DiskCache;
 import org.sethia.utils.TimeUtils;
 import org.sethia.utils.Tuple;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -31,12 +33,17 @@ import org.sethia.utils.Tuple;
  */
 public class PortfolioTest {
 
+  private static final Logger log = LoggerFactory.getLogger(PortfolioTest.class);
+
   private void assertAppreciations(List<Tuple<Date, Double>> actualAppreciationsSinceStart,
       Double[] expectedAppreciations, String[] expectedDates) throws ParseException {
 
+    log.debug("actual appreciations: {}", actualAppreciationsSinceStart);
+    log.debug("expected: {}, {}", expectedAppreciations, expectedDates);
+
     for (int index = 0; index < actualAppreciationsSinceStart.size(); index++) {
       String failureMessage = "failed at index " + index;
-
+      log.debug("checking index {}", index);
       Assert.assertEquals(failureMessage,
           expectedAppreciations[index],
           actualAppreciationsSinceStart.get(index).getRight());
