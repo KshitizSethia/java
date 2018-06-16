@@ -37,6 +37,7 @@ public abstract class PriceRange {
   public abstract Long getVolume();
 
   public final Double getDayPrice() {
-    return (getHigh() + getLow()) / 2;
+    //return (getHigh() + getLow()) / 2;
+    return getClose();
   }
 }

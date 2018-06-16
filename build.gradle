@@ -54,10 +54,11 @@ dependencies {
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.0.1'
     // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
     compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5'
-    // https://mvnrepository.com/artifact/jfree/jfreechart
-    compile group: 'jfree', name: 'jfreechart', version: '1.0.12'
     // https://mvnrepository.com/artifact/net.sourceforge.argparse4j/argparse4j
     compile group: 'net.sourceforge.argparse4j', name: 'argparse4j', version: '0.2.0'
+
+    // https://mvnrepository.com/artifact/jfree/jfreechart
+    compile group: 'jfree', name: 'jfreechart', version: '1.0.12'
 }
 
 clean.doFirst {

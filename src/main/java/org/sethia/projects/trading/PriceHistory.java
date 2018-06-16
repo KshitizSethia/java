@@ -22,6 +22,7 @@ import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.util.Strings;
 import org.sethia.utils.TimeUtils;
+import org.sethia.utils.Tuple;
 import org.sethia.utils.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,11 +52,10 @@ public class PriceHistory {
     return pricesSortedByDate.get(key);
   }
 
-  //TODO return tuple with date
-  public List<Double> getAppreciationHistory(int tradingDays) {
+  public List<Tuple<Date, Double>> getAppreciationHistory(int tradingDays) {
     List<String> days = new ArrayList<>(pricesSortedByDate.keySet());
     int initialDayIndex = days.size() - tradingDays;
-    List<Double> result = new ArrayList<>();
+    List<Tuple<Date, Double>> result = new ArrayList<>();
     final double units_bought =
         INITIAL_INVESTMENT / pricesSortedByDate.get(days.get(initialDayIndex)).getDayPrice();
 
@@ -65,7 +65,8 @@ public class PriceHistory {
       final double currentValue = units_bought * priceRange.getDayPrice();
       final double gain = currentValue - INITIAL_INVESTMENT;
 
-      result.add(gain * 100.0 / INITIAL_INVESTMENT);
+      result.add(Tuple.of(days.get(index)
+          , gain * 100.0 / INITIAL_INVESTMENT));
     }
 
     return result;
@@ -83,7 +84,7 @@ public class PriceHistory {
   public static class Builder {
 
     // TODO make a Config class
-    private static final String KEY_PATH = "src/main/java/org/sethia/projects/trading/config.txt";
+    private static final String KEY_PATH = "src/main/resources/config.txt";
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final String API_KEY = readApiKey();
 

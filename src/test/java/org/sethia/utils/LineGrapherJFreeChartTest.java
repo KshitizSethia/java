@@ -10,13 +10,14 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.sethia.projects.trading.PriceHistory;
 import org.sethia.projects.trading.Ticker;
+import org.sethia.utils.graphing.LineGrapherJFreeChart;
 
-public class LineGrapherTest {
+public class LineGrapherJFreeChartTest {
 
   @Test
   @Ignore
   public void test_Graphing_CompareIndices() throws IOException, InterruptedException {
-    LineGrapher lineGrapher = new LineGrapher("Comparing tickers", "Time",
+    LineGrapherJFreeChart lineGrapher = new LineGrapherJFreeChart("Comparing tickers", "Time",
         "Gain %age");
 
     final Double usd_invested = 100.0;
@@ -25,12 +26,13 @@ public class LineGrapherTest {
         Ticker.NASDAQ.getName(), Ticker.DOW30.getName()}) {
       PriceHistory prices = PriceHistory.Builder.of(tickerName);
 
-      List<Double> appreciationPercentages = prices
+      List<Tuple<Date, Double>> appreciationPercentages = prices
           .getAppreciationHistory(300);
 
-      for (int index = 0; index < appreciationPercentages.size(); index++) {
-        lineGrapher.addPoint(appreciationPercentages.get(index), index, tickerName);
-      }
+      appreciationPercentages
+          .forEach(tuple ->
+              lineGrapher.addPoint(tuple.getLeft(), tuple.getRight(), tickerName)
+          );
     }
     lineGrapher.render();
     TimeUnit.SECONDS.sleep(5);
@@ -38,7 +40,7 @@ public class LineGrapherTest {
 
   @Test
   public void test_datesAndDoubles_2Lines() throws ParseException, InterruptedException {
-    LineGrapher grapher = new LineGrapher("Test graph", "Time", "Gain %age");
+    LineGrapherJFreeChart grapher = new LineGrapherJFreeChart("Test graph", "Time", "Gain %age");
 
     Random random = new Random();
 
@@ -48,8 +50,8 @@ public class LineGrapherTest {
         currentDay.compareTo(today) <= 0;
         currentDay = TimeUtils.PDT.incrementByADay(currentDay)) {
 
-      grapher.addPoint(10 + random.nextDouble() * 90, currentDay, "line100");
-      grapher.addPoint(random.nextDouble() * 10, currentDay, "line10");
+      grapher.addPoint(currentDay, 10 + random.nextDouble() * 90, "line100");
+      grapher.addPoint(currentDay, random.nextDouble() * 10, "line10");
     }
 
     grapher.render();
